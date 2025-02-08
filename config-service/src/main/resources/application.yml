@@ -1,0 +1,13 @@
+server:
+  port: 8765
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/VeryBoredBeko/config-service.git
+          default-label: main
+          search-paths: "{application}"
+          clone-on-start: true
