@@ -11,3 +11,8 @@ spring:
           default-label: main
           search-paths: "{application}"
           clone-on-start: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
