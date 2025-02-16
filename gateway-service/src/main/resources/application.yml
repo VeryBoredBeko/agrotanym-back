@@ -6,3 +6,5 @@ spring:
   cloud:
     config:
       uri: http://localhost:8765
+      username: client
+      password: 12345

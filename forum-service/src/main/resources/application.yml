@@ -1,6 +1,6 @@
 spring:
   application:
-    name: discovery-service
+    name: forum-service
   config:
     import: 'optional:configserver:'
   cloud:
