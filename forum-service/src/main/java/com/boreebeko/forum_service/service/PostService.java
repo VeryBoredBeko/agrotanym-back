@@ -1,9 +1,13 @@
 package com.boreebeko.forum_service.service;
 
+import com.boreebeko.forum_service.domain.Comment;
 import com.boreebeko.forum_service.domain.Post;
 import com.boreebeko.forum_service.domain.exception.AccessDeniedException;
 import com.boreebeko.forum_service.domain.exception.ResourceNotFoundException;
+import com.boreebeko.forum_service.dto.CommentDTO;
+import com.boreebeko.forum_service.mapper.CommentMapper;
 import com.boreebeko.forum_service.mapper.PostMapper;
+import com.boreebeko.forum_service.repository.CommentRepository;
 import com.boreebeko.forum_service.repository.PostRepository;
 import com.boreebeko.forum_service.dto.PostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +23,15 @@ import java.util.UUID;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+
     private final PostMapper postMapper = PostMapper.INSTANCE;
+    private final CommentMapper commentMapper = CommentMapper.INSTANCE;
 
     @Autowired
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
     }
 
     public PostDTO save(PostDTO postDTO) {
@@ -86,5 +94,27 @@ public class PostService {
 
         Post entity = optional.orElseThrow(ResourceNotFoundException::new);
         return postMapper.toDTO(entity);
+    }
+
+    public PostDTO addComment(Long id, CommentDTO commentDTO) {
+
+        // TODO: Check is this good practice
+//        if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated())
+//            throw new AccessDeniedException();
+
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+
+        Post post = postRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+
+        Comment comment = commentMapper.toEntity(commentDTO);
+        comment.setPost(post);
+        comment.setUserId(userId);
+
+        commentRepository.save(comment);
+
+        post.getComments().add(comment);
+
+        return postMapper.toDTO(post);
     }
 }

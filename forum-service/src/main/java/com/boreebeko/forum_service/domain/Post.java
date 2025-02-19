@@ -1,19 +1,18 @@
 package com.boreebeko.forum_service.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
-@Entity
-@Table(name = "posts", schema = "forum")
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
+@Table(name = "posts", schema = "forum")
 public class Post extends Base implements Serializable {
 
     @Column(name = "title")
@@ -21,4 +20,7 @@ public class Post extends Base implements Serializable {
 
     @Column(name = "content")
     private String content;
+
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 }

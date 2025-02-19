@@ -22,7 +22,7 @@ public abstract class Base implements Serializable {
     @Column(name = "user_id")
     private UUID userId;
 
-    @Column(name = "created_at", insertable = false, updatable = false, columnDefinition = "default current_timestamp")
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", insertable = false, updatable = false)

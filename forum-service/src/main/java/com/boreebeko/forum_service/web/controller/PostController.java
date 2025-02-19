@@ -1,5 +1,6 @@
 package com.boreebeko.forum_service.web.controller;
 
+import com.boreebeko.forum_service.dto.CommentDTO;
 import com.boreebeko.forum_service.service.PostService;
 import com.boreebeko.forum_service.dto.PostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/posts/create")
+    @PostMapping(value = "/posts")
     public ResponseEntity<PostDTO> createPost(@AuthenticationPrincipal Jwt jwt, @RequestBody PostDTO postDTO) {
 
         UUID userUUID = UUID.fromString(jwt.getClaimAsString("sub"));
@@ -56,5 +57,11 @@ public class PostController {
     public ResponseEntity<Void> deletePostById(@PathVariable Long id) {
         postService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/posts/{id}/comments")
+    public ResponseEntity<PostDTO> addCommentToPost(@PathVariable Long id, @RequestBody CommentDTO commentDTO) {
+        PostDTO response = postService.addComment(id, commentDTO);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
