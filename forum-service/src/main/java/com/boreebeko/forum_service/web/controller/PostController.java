@@ -4,6 +4,8 @@ import com.boreebeko.forum_service.dto.CommentDTO;
 import com.boreebeko.forum_service.service.PostService;
 import com.boreebeko.forum_service.dto.PostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,19 +25,24 @@ public class PostController {
         this.postService = postService;
     }
 
+    // TODO: Use Redis for caching
+
     @GetMapping(value = "/posts")
+    @Cacheable("posts")
     public ResponseEntity<List<PostDTO>> getAllPosts() {
         List<PostDTO> response = postService.getAllPosts();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(value = "/posts/{id}")
+    @Cacheable(value = "posts", key = "#id")
     public ResponseEntity<PostDTO> getPostById(@PathVariable Long id) {
         PostDTO response = postService.getPostById(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(value = "/posts")
+    @CacheEvict(value = "posts", allEntries = true)
     public ResponseEntity<PostDTO> createPost(@AuthenticationPrincipal Jwt jwt, @RequestBody PostDTO postDTO) {
 
         UUID userUUID = UUID.fromString(jwt.getClaimAsString("sub"));
@@ -54,6 +61,7 @@ public class PostController {
     }
 
     @DeleteMapping(value = "/posts/{id}")
+    @CacheEvict(value = "posts", key = "#id", allEntries = true)
     public ResponseEntity<Void> deletePostById(@PathVariable Long id) {
         postService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
