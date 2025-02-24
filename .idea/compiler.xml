@@ -11,9 +11,8 @@
         <module name="user-service" />
         <module name="discovery-service" />
         <module name="gateway-service" />
-        <module name="image-service" />
       </profile>
-      <profile name="Annotation profile for forum-service" enabled="true">
+      <profile name="Annotation profile for image-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -22,6 +21,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.6.3/mapstruct-1.6.3.jar" />
         </processorPath>
+        <module name="image-service" />
         <module name="forum-service" />
       </profile>
     </annotationProcessing>

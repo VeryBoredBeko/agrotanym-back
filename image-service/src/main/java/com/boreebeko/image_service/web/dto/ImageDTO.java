@@ -1,23 +1,18 @@
 package com.boreebeko.image_service.web.dto;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
 public class ImageDTO {
 
-    private String fileName;
-    private byte[] bytes;
-
-    public ImageDTO(String fileName, byte[] bytes) {
-        this.fileName = fileName;
-        this.bytes = bytes;
-    }
-
-    public ImageDTO() {
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public byte[] getBytes() {
-        return bytes;
-    }
+    private UUID id;
+    private String imageName;
+    private String contentType;
+    private String url;
+    private String classifiedLabel;
+    private String processedAt;
 }

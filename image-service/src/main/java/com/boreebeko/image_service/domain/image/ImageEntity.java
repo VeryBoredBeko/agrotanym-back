@@ -1,12 +1,21 @@
 package com.boreebeko.image_service.domain.image;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "images")
-public class ImageEntity {
+@NoArgsConstructor
+@Getter
+public class ImageEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -14,45 +23,32 @@ public class ImageEntity {
     private UUID id;
 
     @Column(name = "userID")
+    @Setter
     private String userID;
 
-    @Column(name = "fileName")
-    private String fileName;
+    @Column(name = "image_name")
+    @Setter
+    private String imageName;
 
-    public ImageEntity() {
-    }
+    @Column(name = "content_type")
+    @Setter
+    private String contentType;
 
-    public ImageEntity(String userID, String fileName) {
+    @Column(name = "url")
+    @Setter
+    private String url;
+
+    @Column(name = "classified_label")
+    @Setter
+    private String classifiedLabel;
+
+    @Column(name = "processed_at")
+    @CreationTimestamp
+    private LocalDateTime processedAt;
+
+    public ImageEntity(String userID, String imageName, String contentType) {
         this.userID = userID;
-        this.fileName = fileName;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getUserID() {
-        return userID;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    @Override
-    public String toString() {
-        return "ImageEntity{" +
-                "id=" + id +
-                ", userID=" + userID +
-                ", fileName='" + fileName + '\'' +
-                '}';
+        this.imageName = imageName;
+        this.contentType = contentType;
     }
 }
