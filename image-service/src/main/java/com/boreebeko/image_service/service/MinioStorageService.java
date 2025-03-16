@@ -95,7 +95,11 @@ public class MinioStorageService implements ImageStorageService {
     @Transactional(readOnly = true)
     @Override
     public List<ImageDTO> listImages() {
-        return imageMapper.toDTOList(imageRepository.findAll());
+
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userId = jwt.getClaimAsString("sub");
+
+        return imageMapper.toDTOList(imageRepository.findImagesByUserID(userId));
     }
 
     // TODO: Refactor hardcoded content-type while uploading

@@ -2,11 +2,16 @@ package com.boreebeko.forum_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class WebAuthorizationConfig {
 
     @Bean
@@ -14,11 +19,12 @@ public class WebAuthorizationConfig {
 
         httpSecurity
                 .authorizeHttpRequests(http -> http
-                        .requestMatchers("/topics", "/topics/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/posts", "/posts/{id}", "/posts/{id}/comments", "/questions", "/questions/{id}", "/questions/{id}/answers"
+                        ).permitAll()
                         .anyRequest().authenticated()
-                );
-
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return httpSecurity.build();
     }

@@ -6,17 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
 @Setter
-public class PostDTO {
+public class AnswerDTO {
 
     private Long id;
     private UUID userId;
-    private String title;
     private String content;
 
     @JsonFormat(pattern = "yyyy:MM:dd HH:mm")
@@ -24,5 +22,6 @@ public class PostDTO {
 
     @JsonFormat(pattern = "yyyy:MM:dd HH:mm")
     private LocalDateTime updatedAt;
-    private List<CommentDTO> comments;
+
+    private boolean isCurrentUserAnswer;
 }

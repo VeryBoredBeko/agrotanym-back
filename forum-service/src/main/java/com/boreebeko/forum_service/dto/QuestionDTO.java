@@ -6,23 +6,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
 @Setter
-public class PostDTO {
+public class QuestionDTO {
 
     private Long id;
     private UUID userId;
     private String title;
-    private String content;
+    private String description;
 
     @JsonFormat(pattern = "yyyy:MM:dd HH:mm")
     private LocalDateTime createdAt;
 
     @JsonFormat(pattern = "yyyy:MM:dd HH:mm")
     private LocalDateTime updatedAt;
-    private List<CommentDTO> comments;
 }

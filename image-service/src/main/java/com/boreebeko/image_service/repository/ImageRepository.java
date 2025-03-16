@@ -10,5 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ImageRepository extends JpaRepository<ImageEntity, UUID> {
 
-    List<ImageEntity> getImagesByUserID(String userID);
+    List<ImageEntity> findImagesByUserID(String userID);
 }

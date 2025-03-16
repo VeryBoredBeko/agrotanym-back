@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -96,16 +97,46 @@ public class PostService {
         return postMapper.toDTO(entity);
     }
 
-    public PostDTO addComment(Long id, CommentDTO commentDTO) {
+    public List<PostDTO> getPostsByUserId() {
+
+        if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) throw new AccessDeniedException();
+
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return postMapper.toDTOList(postRepository.findPostsByUserId(UUID.fromString(jwt.getClaimAsString("sub"))));
+    }
+
+    public List<CommentDTO> getCommentsByPostId(Long id) {
+
+        Jwt jwt = null;
+        if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+            jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        }
+
+        List<CommentDTO> response = commentMapper.toDTOList(commentRepository.findCommentsByPostId(id));
+
+        if (jwt != null) {
+            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            response = response.stream().map((record) -> {
+                if (record.getUserId().compareTo(userId) == 0) {
+                    record.setCurrentUserComment(true);
+                }
+                return record;
+            }).collect(Collectors.toList());
+        }
+
+        return response;
+    }
+
+    public PostDTO addComment(Long postId, CommentDTO commentDTO) {
 
         // TODO: Check is this good practice
-//        if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated())
-//            throw new AccessDeniedException();
+        if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated())
+            throw new AccessDeniedException();
 
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
 
-        Post post = postRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
+        Post post = postRepository.findById(postId).orElseThrow(ResourceNotFoundException::new);
 
         Comment comment = commentMapper.toEntity(commentDTO);
         comment.setPost(post);
@@ -117,4 +148,49 @@ public class PostService {
 
         return postMapper.toDTO(post);
     }
+
+//    public CommentDTO updateComment(Long postId, Long commentId, CommentDTO commentDTO) {
+//
+//        if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated())
+//            throw new AccessDeniedException();
+//
+//        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+//
+//        Post post = postRepository.findById(postId).orElseThrow(ResourceNotFoundException::new);
+//        Comment comment = commentRepository.findById(commentId).orElseThrow(ResourceNotFoundException::new);
+//
+//        if (!Objects.equals(post.getId(), comment.getPost().getId()))
+//            throw new IllegalArgumentException("Comment not from this post");
+//
+//        if (comment.getUserId().compareTo(userId) != 0)
+//            throw new AccessDeniedException();
+//
+//        comment.setContent(commentDTO.getContent());
+//
+//        Comment updatedComment = commentRepository.save(comment);
+//        return commentMapper.toDTO(updatedComment);
+//    }
+//
+//    public void deleteComment(Long postId, Long commentId) {
+//        if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated())
+//            throw new AccessDeniedException();
+//
+//        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+//
+//        Post post = postRepository.findById(postId).orElseThrow(ResourceNotFoundException::new);
+//        Comment comment = commentRepository.findById(commentId).orElseThrow(ResourceNotFoundException::new);
+//
+//        if (!Objects.equals(post.getId(), comment.getPost().getId()))
+//            throw new IllegalArgumentException("Comment not from this post");
+//
+//        if (comment.getUserId().compareTo(userId) != 0)
+//            throw new AccessDeniedException();
+//
+//        commentRepository
+//
+//        Comment updatedComment = commentRepository.save(comment);
+//        return commentMapper.toDTO(updatedComment);
+//    }
 }
