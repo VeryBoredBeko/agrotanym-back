@@ -1,15 +1,19 @@
-package com.boreebeko.forum_service.service;
+package com.boreebeko.forum_service_v2.service;
 
-import com.boreebeko.forum_service.domain.Answer;
-import com.boreebeko.forum_service.domain.Question;
-import com.boreebeko.forum_service.domain.exception.AccessDeniedException;
-import com.boreebeko.forum_service.domain.exception.ResourceNotFoundException;
-import com.boreebeko.forum_service.dto.AnswerDTO;
-import com.boreebeko.forum_service.dto.QuestionDTO;
-import com.boreebeko.forum_service.mapper.AnswerMapper;
-import com.boreebeko.forum_service.mapper.QuestionMapper;
-import com.boreebeko.forum_service.repository.AnswerRepository;
-import com.boreebeko.forum_service.repository.QuestionRepository;
+import com.boreebeko.forum_service_v2.domain.Answer;
+import com.boreebeko.forum_service_v2.domain.Question;
+import com.boreebeko.forum_service_v2.domain.QuestionTag;
+import com.boreebeko.forum_service_v2.domain.Tag;
+import com.boreebeko.forum_service_v2.domain.exception.AccessDeniedException;
+import com.boreebeko.forum_service_v2.domain.exception.ResourceNotFoundException;
+import com.boreebeko.forum_service_v2.dto.AnswerDTO;
+import com.boreebeko.forum_service_v2.dto.QuestionDTO;
+import com.boreebeko.forum_service_v2.dto.TagDTO;
+import com.boreebeko.forum_service_v2.mapper.AnswerMapper;
+import com.boreebeko.forum_service_v2.mapper.QuestionMapper;
+import com.boreebeko.forum_service_v2.repository.AnswerRepository;
+import com.boreebeko.forum_service_v2.repository.QuestionRepository;
+import com.boreebeko.forum_service_v2.repository.QuestionTagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +36,10 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
+    private final QuestionTagRepository questionTagRepository;
+
+    private final TagService tagService;
+
     private final QuestionMapper questionMapper = QuestionMapper.INSTANCE;
     private final AnswerMapper answerMapper = AnswerMapper.INSTANCE;
 
@@ -39,17 +47,38 @@ public class QuestionService {
     private static final int PAGE_SIZE = 10;
 
     @Autowired
-    public QuestionService(QuestionRepository questionRepository, AnswerRepository answerRepository) {
+    public QuestionService(QuestionRepository questionRepository, AnswerRepository answerRepository, QuestionTagRepository questionTagRepository, TagService tagService) {
         this.questionRepository = questionRepository;
         this.answerRepository = answerRepository;
+        this.questionTagRepository = questionTagRepository;
+        this.tagService = tagService;
     }
 
     @Transactional(readOnly = true)
-    public List<QuestionDTO> getQuestions(int pageNumber) {
+    public List<QuestionDTO> getQuestions(int pageNumber, Long tagId) {
+
         Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE);
 
-        List<Question> questions = questionRepository.findAll(pageable).stream().toList();
-        return questionMapper.toDTOList(questions);
+        List<Question> questions = null;
+
+        if (tagId != null) {
+            questions = questionTagRepository.findQuestionsByTagId(tagId, pageable).stream().toList();
+
+        } else {
+            questions = questionRepository.findAll(pageable).stream().toList();
+        }
+
+        List<QuestionDTO> questionDTOS = questionMapper.toDTOList(questions).stream()
+                .peek(questionDTO -> {
+                    List<QuestionTag> questionTagList = questionTagRepository.findQuestionTagByQuestionId(questionDTO.getId());
+                    if (questionTagList.isEmpty()) return;
+
+                    List<TagDTO> tagDTOList = tagService.getAllTagsById(questionTagList.stream().map(questionTag -> { return questionTag.getTag().getId();}).toList());
+                    questionDTO.setTagDTOList(tagDTOList);
+                })
+                .toList();
+
+        return questionDTOS;
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +99,21 @@ public class QuestionService {
         newQuestion.setUserId(currentUserId);
 
         Question persistedQuestion = questionRepository.save(newQuestion);
+
+        if (questionDTO.getTagIdList() == null)
+            throw new IllegalArgumentException();
+
+        if (questionDTO.getTagIdList().isEmpty())
+            throw new IllegalArgumentException();
+
+        for (Long tagId : questionDTO.getTagIdList()) {
+            if (tagService.isTagExists(tagId)) {
+                Tag tag = tagService.getReferenceById(tagId);
+                QuestionTag questionTag = new QuestionTag(persistedQuestion, tag);
+                questionTagRepository.save(questionTag);
+            }
+        }
+
         return questionMapper.toDTO(persistedQuestion);
     }
 
@@ -88,8 +132,8 @@ public class QuestionService {
         if (!questionDTO.getTitle().isEmpty())
             persistedQuestion.setTitle(questionDTO.getTitle());
 
-        if (!questionDTO.getDescription().isEmpty())
-            persistedQuestion.setDescription(questionDTO.getDescription());
+        if (!questionDTO.getBody().isEmpty())
+            persistedQuestion.setBody(questionDTO.getBody());
 
         Question updatedQuestion = questionRepository.save(persistedQuestion);
         return questionMapper.toDTO(updatedQuestion);
@@ -177,8 +221,8 @@ public class QuestionService {
 
         if (currentAnswer.getUserId().compareTo(currentUserId) != 0) throw new AccessDeniedException();
 
-        if (!answerDTO.getContent().isEmpty())
-            currentAnswer.setContent(answerDTO.getContent());
+        if (!answerDTO.getBody().isEmpty())
+            currentAnswer.setBody(answerDTO.getBody());
 
         Answer persistedAnswer = answerRepository.save(currentAnswer);
         return answerMapper.toDTO(persistedAnswer);

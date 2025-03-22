@@ -1,23 +1,13 @@
-package com.boreebeko.forum_service.config;
+package com.boreebeko.forum_service_v2.config;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -30,7 +20,7 @@ public class WebAuthorizationConfig {
         httpSecurity
                 .authorizeHttpRequests(http -> http
                         .requestMatchers(HttpMethod.GET,
-                                "/posts", "/posts/{id}", "/posts/{id}/comments", "/questions", "/questions/{id}", "/questions/{id}/answers"
+                                 "/questions", "/questions/{id}", "/questions/{id}/answers"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
