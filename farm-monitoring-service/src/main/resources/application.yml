@@ -1,0 +1,20 @@
+server:
+  port: 8098
+spring:
+  application:
+    name: farm-monitoring-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/spring-boot-microservices-realm
+  datasource:
+    url: jdbc:postgresql://localhost:5432/farm-monitoring-service
+    username: postgres
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
+    show-sql: true
+    format-sql: true

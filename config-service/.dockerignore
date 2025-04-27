@@ -1,0 +1,13 @@
+
+src/
+.git/
+.gitignore
+README.md
+Dockerfile
+docker-compose.yml
+*.iml
+.idea/
+*.log
+*.tmp
+
+!target/*.jar

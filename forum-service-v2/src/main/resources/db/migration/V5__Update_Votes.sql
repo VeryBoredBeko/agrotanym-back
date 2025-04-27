@@ -1,0 +1,1 @@
+ALTER TABLE votes ADD CONSTRAINT unique_user_vote UNIQUE (user_id, post_type, post_id);

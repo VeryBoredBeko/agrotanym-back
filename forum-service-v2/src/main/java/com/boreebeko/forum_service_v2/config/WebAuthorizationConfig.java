@@ -20,7 +20,8 @@ public class WebAuthorizationConfig {
         httpSecurity
                 .authorizeHttpRequests(http -> http
                         .requestMatchers(HttpMethod.GET,
-                                 "/questions", "/questions/{id}", "/questions/{id}/answers"
+                                 "/questions", "/questions/{id}", "/questions/{id}/answers",
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

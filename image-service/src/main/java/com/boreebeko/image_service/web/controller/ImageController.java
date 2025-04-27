@@ -4,9 +4,8 @@ import com.boreebeko.image_service.service.ImageStorageService;
 import com.boreebeko.image_service.web.dto.ImageDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v2/images")
-@Tag(name = "Image processing", description = "API for uploading and processing images")
+@Tag(name = "Image processing controller", description = "API for uploading, fetching and processing images")
 public class ImageController {
 
     private final ImageStorageService imageStorageService;
@@ -29,35 +28,48 @@ public class ImageController {
         this.imageStorageService = imageStorageService;
     }
 
+    @Operation(
+            summary = "Get user uploaded images DTO",
+            description = "Returns list of ImageDTO objects which was uploaded by user."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Fetched all user uploaded images successfully")
+    })
     @GetMapping
-    public ResponseEntity<List<ImageDTO>> getAllImages() {
-        return new ResponseEntity<>(imageStorageService.listImages(), HttpStatus.OK);
+    public ResponseEntity<List<ImageDTO>> getAllImages(@RequestParam(required = false, defaultValue = "0") int page) {
+        return new ResponseEntity<>(imageStorageService.listImages(page), HttpStatus.OK);
     }
 
     @Operation(
-            summary = "Upload an image",
-            description = "Uploads an image file for processing",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
-                    @ApiResponse(responseCode = "400", description = "Invalid image file", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
-            }
+            summary = "Upload image for processing",
+            description = "Uploading image for processing. Function will wait 'image' named multipart-file to store it."
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Image wasn't uploaded")
+    })
     @PostMapping
-    public ResponseEntity<Void> uploadImage(
-            @Parameter(
-                    description = "The image file to upload",
-                    required = true,
-                    content = @Content(mediaType = "application/octet-stream", schema = @Schema(type = "string", format = "binary"))
-            )
+    public ResponseEntity<ImageDTO> uploadImage(
+            @Parameter(description = "User uploaded image multipart-file")
             @RequestParam MultipartFile image
     ) {
-        imageStorageService.upload(image);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(imageStorageService.upload(image), HttpStatus.OK);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deleteImage(@RequestParam String imageId) {
+    @Operation(
+            summary = "Delete uploaded image by image ID",
+            description = "Function will wait for 'imageId' parameter and then delete it if exists."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Image wasn't deleted"),
+            @ApiResponse(responseCode = "404", description = "There is no image with such ID")
+    })
+    @DeleteMapping("/{imageId}")
+    public ResponseEntity<Void> deleteImage(
+            @Parameter(description = "Request parameter imageId means ID of image which user wants to delete")
+            @PathVariable String imageId
+    ) {
         imageStorageService.delete(UUID.fromString(imageId));
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -1,19 +1,26 @@
-server:
-  port: 8097
+#server:
+#  port: 8097
 spring:
   application:
     name: forum-service-v2
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080/realms/spring-boot-microservices-realm
-  datasource:
-      url: jdbc:postgresql://localhost:5432/forum-service-v2
-      username: postgres
-      password: admin
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: true
-    format-sql: true
+  config:
+    import: 'optional:configserver:'
+  cloud:
+    config:
+      uri: http://localhost:8765
+      username: client
+      password: 12345
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://localhost:8080/realms/spring-boot-microservices-realm
+#  datasource:
+#      url: jdbc:postgresql://localhost:5432/forum-service-v2
+#      username: postgres
+#      password: admin
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    show-sql: true
+#    format-sql: true

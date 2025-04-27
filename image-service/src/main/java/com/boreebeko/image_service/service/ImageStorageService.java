@@ -7,10 +7,24 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Interface for image storaging services
+ * */
 @Component
 public interface ImageStorageService {
 
-    void upload(MultipartFile image);
+    /**
+     * @param image image MultipartFile object uploaded by user
+     * */
+    ImageDTO upload(MultipartFile image);
+
+    /**
+     * @param id the id of user uploaded image
+     * */
     void delete(UUID id);
-    List<ImageDTO> listImages();
+
+    /**
+     * @return list of ImageDTO, which were uploaded by the user
+     * */
+    List<ImageDTO> listImages(int page);
 }
