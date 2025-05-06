@@ -11,11 +11,13 @@ import com.boreebeko.farm_monitoring_service.mapper.FieldMapper;
 import com.boreebeko.farm_monitoring_service.mapper.MarkerMapper;
 import com.boreebeko.farm_monitoring_service.repository.FieldRepository;
 import com.boreebeko.farm_monitoring_service.repository.FieldRoleRepository;
+import com.boreebeko.farm_monitoring_service.repository.FieldSeasonRepository;
 import com.boreebeko.farm_monitoring_service.repository.MarkerRepository;
 import com.boreebeko.farm_monitoring_service.service.auth.UserService;
 import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,13 +51,16 @@ public class FieldService {
 
     private final FieldRoleRepository fieldRoleRepository;
 
+    private final FieldSeasonRepository fieldSeasonRepository;
+
     @Autowired
-    public FieldService(FieldRepository fieldRepository, MarkerRepository markerRepository, UserService userService, FieldAccessService fieldAccessService, FieldRoleRepository fieldRoleRepository) {
+    public FieldService(FieldRepository fieldRepository, MarkerRepository markerRepository, UserService userService, FieldAccessService fieldAccessService, FieldRoleRepository fieldRoleRepository, FieldSeasonRepository fieldSeasonRepository) {
         this.fieldRepository = fieldRepository;
         this.markerRepository = markerRepository;
         this.userService = userService;
         this.fieldAccessService = fieldAccessService;
         this.fieldRoleRepository = fieldRoleRepository;
+        this.fieldSeasonRepository = fieldSeasonRepository;
     }
 
     /**
@@ -65,6 +70,7 @@ public class FieldService {
      * @throws IllegalArgumentException if field has invalid polygon form
      * @return FieldDTO mapping of newly created field
      * */
+    @Transactional
     public FieldDTO createField(FieldDTO fieldDTO) {
 
         UUID currentUserId = UUID.fromString(userService.getUserId());
@@ -111,6 +117,7 @@ public class FieldService {
      * @throws IllegalArgumentException if given field doesn't contain marker's position
      * @return MarkerDTO mapping of newly created marker
      * */
+    @Transactional
     public MarkerDTO createMarkerByFieldId(Long fieldId, MarkerDTO markerDTO) {
 
         UUID currentUserId = UUID.fromString(userService.getUserId());
@@ -142,6 +149,7 @@ public class FieldService {
      * @param fieldId The unique ID of field
      * @return List of MarkerDTO mappings which contained in field
      * */
+    @Transactional(readOnly = true)
     public List<MarkerDTO> getAllMarkersByFieldId(Long fieldId) {
         UUID currentUserId = UUID.fromString(userService.getUserId());
 
@@ -152,15 +160,20 @@ public class FieldService {
     }
 
     /**
-     * Delete the marker contained in field
+     * Delete the field and all related data
      *
      * @param fieldId The unique ID of field
      * */
+    @Transactional
     public void deleteFieldById(Long fieldId) {
         UUID currentUserId = UUID.fromString(userService.getUserId());
 
         if (fieldRepository.getOwnerOfTheField(fieldId).compareTo(currentUserId) != 0)
             throw new AccessDeniedException();
+
+        markerRepository.deleteAllRelatedMarkersByFieldId(fieldId);
+        fieldSeasonRepository.deleteAllRelatedSeasonRecordsByFieldId(fieldId);
+        fieldRoleRepository.deleteAllRelatedUsersByFieldId(fieldId);
 
         fieldRepository.deleteById(fieldId);
     }
@@ -170,6 +183,7 @@ public class FieldService {
      *
      * @return List of FieldDTO mappings which user had created
      * */
+    @Transactional(readOnly = true)
     public List<FieldDTO> getAllFields() {
         UUID currentUserId = UUID.fromString(userService.getUserId());
         return fieldMapper.toDTOList(fieldRepository.findAllById(fieldRoleRepository.findAllRelatedFieldsByUserId(currentUserId)));
@@ -182,6 +196,7 @@ public class FieldService {
      * @throws IllegalArgumentException if there is no such field with given id
      * @return FieldDTO mapping of field
      * */
+    @Transactional(readOnly = true)
     public FieldDTO getFieldById(Long fieldId) {
 
         UUID currentUserId = UUID.fromString(userService.getUserId());
@@ -199,6 +214,18 @@ public class FieldService {
         return fieldDTO;
     }
 
+    /**
+     * Deletes specified marker in particular field.
+     *
+     * <p>
+     *     This method doesn't check the marker and field for existence.
+     *     If there is no such marker or a field it does nothing.
+     * </p>
+     *
+     * @param fieldId The unique ID of field
+     * @param markerId The unique ID of marker
+     */
+    @Transactional
     public void deleteMarkerById(Long fieldId, Long markerId) {
 
         UUID currentUserId = UUID.fromString(userService.getUserId());

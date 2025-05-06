@@ -15,6 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service for managing users access to farm fields.
+ *
+ * <p>
+ *     This service provides operations for adding, fetching and removing user to have an access to a specified field.
+ * </p>
+ *
+ * @author Beknur Tumenov
+ * @since 06.05.2025
+ * */
 @Service
 public class FieldUserManagementService {
 
@@ -34,6 +44,14 @@ public class FieldUserManagementService {
         this.userService = userService;
     }
 
+    /**
+     * Adds user as a worker to a specified field.
+     * @param fieldId The unique ID of field.
+     * @param targetUserId The unique ID of user.
+     *
+     * @throws AccessDeniedException if the user which is calling the operation is not an owner of specified field.
+     * @throws IllegalStateException if the target user is already added as a worker to a specified field.
+     */
     @Transactional
     public void addWorker(Long fieldId, UUID targetUserId) {
 
@@ -59,6 +77,13 @@ public class FieldUserManagementService {
         fieldRoleMapper.toDTO(persistedEntity);
     }
 
+    /**
+     * Returns the list of users who has access to a specified field.
+     * @param fieldId The unique ID of field.
+     * @return list of {@link FieldRoleDTO} instances.
+     *
+     * @throws AccessDeniedException if the user which is calling the operation is not an owner of specified field.
+     */
     @Transactional(readOnly = true)
     public List<FieldRoleDTO> getAllUsers(Long fieldId) {
 
@@ -70,6 +95,14 @@ public class FieldUserManagementService {
         return fieldRoleMapper.toDTOList(fieldRoleRepository.findAllByFieldId(fieldId));
     }
 
+    /**
+     * Removes a user from a specified field.
+     * @param fieldId The unique ID of field
+     * @param targetUserId The unique ID of user
+     *
+     * @throws AccessDeniedException if the user which is calling the operation is not an owner of specified field.
+     * @throws IllegalStateException if the user which is calling the operation is trying to delete himself.
+     */
     @Transactional
     public void removeUser(Long fieldId, UUID targetUserId) {
 

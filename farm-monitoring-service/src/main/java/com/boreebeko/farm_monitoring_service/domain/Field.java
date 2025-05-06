@@ -10,6 +10,13 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Represents a monitored agricultural field in the system.
+ *
+ * <p>
+ *     This entity holds metadata about a field such as its owner, name.
+ * </p>
+ */
 @Entity
 @Table(name = "fields")
 @NoArgsConstructor

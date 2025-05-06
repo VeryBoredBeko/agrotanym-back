@@ -9,6 +9,13 @@ import org.locationtech.jts.geom.Point;
 import java.io.Serializable;
 import java.util.UUID;
 
+/**
+ * Represents a marker in particular monitored agricultural field in the system.
+ *
+ * <p>
+ *     This entity holds data about marker such as its name, description and icon image URl.
+ * </p>
+ */
 @Entity
 @Table(name = "markers")
 @NoArgsConstructor

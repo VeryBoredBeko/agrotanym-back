@@ -27,4 +27,8 @@ public interface FieldRoleRepository extends JpaRepository<FieldRole, Long> {
 
     @Query("SELECT fr.field.id FROM FieldRole fr WHERE fr.userId = :userId")
     Iterable<Long> findAllRelatedFieldsByUserId(@Param("userId") UUID userId);
+
+    @Modifying
+    @Query("DELETE FROM FieldRole fr WHERE fr.field.id = :fieldId")
+    void deleteAllRelatedUsersByFieldId(@Param("fieldId") Long fieldId);
 }

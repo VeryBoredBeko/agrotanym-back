@@ -10,6 +10,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Represents a seasonal data about monitored agricultural field in the system.
+ *
+ * <p>
+ *     This entity holds metadata about a field's season summaries such as its year, crop and yield.
+ * </p>
+ */
 @Entity
 @Table(name = "field_seasons")
 @NoArgsConstructor

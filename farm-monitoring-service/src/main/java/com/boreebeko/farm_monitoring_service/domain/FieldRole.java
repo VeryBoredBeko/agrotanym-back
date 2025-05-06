@@ -9,6 +9,13 @@ import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.util.UUID;
 
+/**
+ * Represents a user role in monitored agricultural field in the system.
+ *
+ * <p>
+ *     This entity holds data about user relation to particular field.
+ * </p>
+ */
 @Entity
 @Table(name = "field_roles")
 @NoArgsConstructor

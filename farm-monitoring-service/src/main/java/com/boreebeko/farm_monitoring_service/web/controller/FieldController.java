@@ -61,7 +61,7 @@ public class FieldController {
     })
     @GetMapping("/fields/{fieldId}")
     public ResponseEntity<FieldDTO> getFieldById(@PathVariable Long fieldId) {
-        return new ResponseEntity<>(fieldService.getFieldById(fieldId), HttpStatus.OK);
+        return new ResponseEntity<>(fieldService.getFieldById(fieldId), HttpStatus.valueOf(401));
     }
 
     @Operation(
